@@ -31,8 +31,8 @@ interface CustomerDao {
     suspend fun getLoggedInCustomerId(): Int?
 
     // ✅ Check user credentials during login
-    @Query("SELECT * FROM customers WHERE name = :name AND password = :password LIMIT 1")
-    suspend fun authenticateUser(name: String, password: String): CustomerEntity?
+    @Query("SELECT * FROM customers WHERE email = :email AND password = :password LIMIT 1")
+    suspend fun authenticateUser(email: String, password: String): CustomerEntity?
 
     // ✅ Retrieve a user by username (for forgot password or profile)
     @Query("SELECT * FROM customers WHERE email = :email LIMIT 1")

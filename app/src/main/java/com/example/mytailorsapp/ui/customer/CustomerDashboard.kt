@@ -9,7 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -50,51 +50,7 @@ fun CustomerDashboardUI(viewModel: CustomerViewModel, navController: NavControll
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Customer Dashboard") },
-                actions = {
-                    Row(
-                        modifier = Modifier.padding(end = 16.dp),
-                        horizontalArrangement = Arrangement.SpaceEvenly
-                    ) {
-                        // 🔹 View Materials Button
-                        IconButton(onClick = { navController.navigate("material_screen") }) {
-                            Icon(
-                                imageVector = Icons.Default.ShoppingCart,
-                                contentDescription = "Materials",
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
-
-                        // 🔹 Check Inventory Button
-                        IconButton(onClick = { navController.navigate("inventory_screen") }) {
-                            Icon(
-                                imageVector = Icons.Default.List,
-                                contentDescription = "Inventory",
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
-
-                        // 🔹 Search Shops Icon
-                        IconButton(onClick = { navController.navigate("shop_search_screen") }) {
-                            Icon(
-                                imageVector = Icons.Default.Search,
-                                contentDescription = "Search Shops",
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
-
-                        // 🔹 Profile Icon (Navigates to Profile)
-                        customer?.let { customerData ->
-                            IconButton(onClick = { navController.navigate("profile_screen/${customerData.id}") }) {
-                                Icon(
-                                    imageVector = Icons.Default.AccountCircle,
-                                    contentDescription = "Profile",
-                                    modifier = Modifier.size(24.dp)
-                                )
-                            }
-                        }
-                    }
-                }
+                title = { Text("Customer Dashboard") }
             )
         }
     ) { paddingValues ->
@@ -110,6 +66,52 @@ fun CustomerDashboardUI(viewModel: CustomerViewModel, navController: NavControll
                 text = "Welcome, ${customer?.name ?: "User"}",
                 style = MaterialTheme.typography.titleLarge
             )
+
+            Spacer(modifier = Modifier.height(16.dp)) // Add spacing below the title
+
+            // 🔹 New Row for Icons (Placed Below the Title)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                // 🔹 View Materials Button (Changed Icon)
+                IconButton(onClick = { navController.navigate("material_screen") }) {
+                    Icon(
+                        imageVector = Icons.Default.ShoppingCart,
+                        contentDescription = "Materials",
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+
+                // 🔹 Check Inventory Button
+                IconButton(onClick = { navController.navigate("inventory_screen") }) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Default.List,
+                        contentDescription = "Inventory",
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+
+                // 🔹 Search Shops Icon
+                IconButton(onClick = { navController.navigate("shop_search_screen") }) {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Search Shops",
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+
+                // 🔹 Profile Icon (Navigates to Profile)
+                customer?.let { customerData ->
+                    IconButton(onClick = { navController.navigate("profile_screen/${customerData.id}") }) {
+                        Icon(
+                            imageVector = Icons.Default.AccountCircle,
+                            contentDescription = "Profile",
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
+                }
+            }
         }
     }
 }

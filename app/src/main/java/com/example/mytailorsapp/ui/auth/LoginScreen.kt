@@ -2,6 +2,7 @@ package com.example.mytailorsapp.ui.auth
 
 import android.content.Context
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -10,6 +11,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -48,6 +50,7 @@ fun LoginScreenUI(navController: NavController?, context: Context) {
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .background(Color.LightGray) // Replace LightGray with your theme color
     ) {
         Image(
             painter = painterResource(id = R.drawable.ic_auth_background_01),

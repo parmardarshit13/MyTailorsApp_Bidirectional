@@ -11,6 +11,13 @@ data class CustomerEntity(
     val email: String,
     val address: String,
     val password: String,
-    val userType: String,
-    val isLoggedIn: Boolean = false
-)
+    val userType: String = "customer", // Default value
+    val isLoggedIn: Boolean = false,
+    val profileImage: String? = null, // Added for future profile pictures
+    val createdAt: Long = System.currentTimeMillis() // Added for tracking
+) {
+    // Helper function to update login status
+    fun withLoginStatus(loggedIn: Boolean): CustomerEntity {
+        return this.copy(isLoggedIn = loggedIn)
+    }
+}

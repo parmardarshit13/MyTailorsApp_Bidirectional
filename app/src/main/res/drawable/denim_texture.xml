@@ -1,0 +1,5 @@
+<!-- res/drawable/denim_texture.xml -->
+<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+    android:src="@drawable/denim"
+    android:tileModeX="repeat"
+    android:tileModeY="repeat"/>

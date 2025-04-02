@@ -21,8 +21,7 @@ import com.example.mytailorsapp.R
 
 class AdminDashboard : ComponentActivity() {
     private val viewModel: WorkerViewModel by viewModels {
-        val database = AppDatabase.getDatabase(applicationContext)
-        WorkerViewModelFactory(database.workerDao())
+        WorkerViewModelFactory(AppDatabase.getDatabase(applicationContext).workerDao())
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,16 +36,10 @@ class AdminDashboard : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdminDashboardUI(viewModel: WorkerViewModel, navController: NavController) {
-    LaunchedEffect(Unit) {
-        viewModel.fetchAllWorkers()
-    }
+    LaunchedEffect(Unit) { viewModel.fetchAllWorkers() }
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Admin Dashboard") }
-            )
-        }
+        topBar = { TopAppBar(title = { Text("Admin Dashboard") }) }
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -54,58 +47,41 @@ fun AdminDashboardUI(viewModel: WorkerViewModel, navController: NavController) {
                 .padding(paddingValues)
                 .padding(16.dp),
             verticalArrangement = Arrangement.Top
-        ) {// 🔹 Welcome Text
-            Text(
-                text = "Welcome, Admin",
-                style = MaterialTheme.typography.titleLarge
-            )
+        ) {
+            Text(text = "Welcome, Admin", style = MaterialTheme.typography.titleLarge)
+            Spacer(modifier = Modifier.height(16.dp))
 
-            Spacer(modifier = Modifier.height(16.dp)) // Space between title & navbar
-
-            // 🔹 Navigation Bar (Moved Below Title)
+            // 🔹 Navigation Bar
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly // Distribute icons evenly
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                IconButton(onClick = { navController.navigate("manage_workers_screen") }) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_manage_workers),
-                        contentDescription = "Manage Workers",
-                        modifier = Modifier.size(24.dp)
-                    )
+                val navItems = listOf(
+                    R.drawable.ic_manage_workers to "manage_workers_screen",
+                    R.drawable.ic_manage_shops to "manage_shops_screen",
+                    R.drawable.ic_manage_inventory to "manage_inventory_screen",
+                    R.drawable.ic_admin_profile to "admin_profile_screen",
+                    null to "worker_search_screen" // Explicitly use null for missing icon
+                )
+
+                navItems.forEach { (icon, route) ->
+                    IconButton(onClick = { navController.navigate(route) }) {
+                        if (icon != null) {
+                            Icon(
+                                painter = painterResource(id = icon),
+                                contentDescription = route,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = "Search",
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                    }
                 }
 
-                IconButton(onClick = { navController.navigate("manage_shops_screen") }) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_manage_shops),
-                        contentDescription = "Manage Shops",
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-
-                IconButton(onClick = { navController.navigate("manage_inventory_screen") }) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_manage_inventory),
-                        contentDescription = "Manage Inventory",
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-
-                IconButton(onClick = { navController.navigate("admin_profile_screen") }) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_admin_profile),
-                        contentDescription = "Admin Profile",
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-
-                IconButton(onClick = { navController.navigate("worker_search_screen") }) {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "Search Workers",
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
             }
         }
     }

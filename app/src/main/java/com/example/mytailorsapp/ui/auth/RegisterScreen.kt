@@ -3,30 +3,29 @@ package com.example.mytailorsapp.ui.auth
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.mytailorsapp.database.AppDatabase
-import android.content.Context
-import android.util.Patterns
-import androidx.compose.foundation.Image
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.sp
 import com.example.mytailorsapp.database.CustomerEntity
 import kotlinx.coroutines.launch
 import com.example.mytailorsapp.R
+import android.content.Context
+import android.util.Patterns
 
 class RegisterScreen : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,8 +47,9 @@ fun RegisterScreenUI(navController: NavController?, context: Context) {
     var address by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
-    var userType by remember { mutableStateOf("customer") } // Default user type
+    var userType by remember { mutableStateOf("Customer") } // Default user type
     var snackbarMessage by remember { mutableStateOf<String?>(null) }
+    var isLoading by remember { mutableStateOf(false) }
 
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
@@ -61,12 +61,9 @@ fun RegisterScreenUI(navController: NavController?, context: Context) {
         }
     }
 
-    // 🔹 Background Image Support
-    Box(
-        modifier = Modifier.fillMaxSize()
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
         Image(
-            painter = painterResource(id = R.drawable.ic_auth_background_02), // Add tailor-related image to `res/drawable`
+            painter = painterResource(id = R.drawable.ic_auth_background_02),
             contentDescription = "Tailor Background",
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
@@ -75,8 +72,8 @@ fun RegisterScreenUI(navController: NavController?, context: Context) {
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("Register", style = TextStyle(fontSize = 24.sp)) },
-                    modifier = Modifier.padding(top = 16.dp) // Move title slightly down
+                    title = { Text("Register", fontSize = 22.sp) },
+                    modifier = Modifier.padding(top = 16.dp)
                 )
             },
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
@@ -86,10 +83,9 @@ fun RegisterScreenUI(navController: NavController?, context: Context) {
                     .fillMaxSize()
                     .padding(padding)
                     .padding(16.dp)
-                    .verticalScroll(rememberScrollState()), // ✅ Enable scrolling
+                    .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.Center
             ) {
-                // ✅ All input fields (same as before)
                 OutlinedTextField(value = name, onValueChange = { name = it.trim() }, label = { Text("Full Name") }, modifier = Modifier.fillMaxWidth())
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(value = contact, onValueChange = { contact = it.trim() }, label = { Text("Contact Number") }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone), modifier = Modifier.fillMaxWidth())
@@ -99,7 +95,6 @@ fun RegisterScreenUI(navController: NavController?, context: Context) {
                 OutlinedTextField(value = address, onValueChange = { address = it.trim() }, label = { Text("Address") }, modifier = Modifier.fillMaxWidth())
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // ✅ User Type Dropdown (unchanged)
                 var expanded by remember { mutableStateOf(false) }
                 Box {
                     OutlinedTextField(
@@ -112,52 +107,54 @@ fun RegisterScreenUI(navController: NavController?, context: Context) {
                         }
                     )
                     DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                        DropdownMenuItem(text = { Text("Customer") }, onClick = { userType = "customer"; expanded = false })
-                        DropdownMenuItem(text = { Text("Tailor") }, onClick = { userType = "tailor"; expanded = false })
+                        DropdownMenuItem(text = { Text("Customer") }, onClick = { userType = "Customer"; expanded = false })
+                        DropdownMenuItem(text = { Text("Tailor") }, onClick = { userType = "Tailor"; expanded = false })
                     }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // ✅ Password Fields
                 OutlinedTextField(value = password, onValueChange = { password = it }, label = { Text("Password") }, visualTransformation = PasswordVisualTransformation(), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password), modifier = Modifier.fillMaxWidth())
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(value = confirmPassword, onValueChange = { confirmPassword = it }, label = { Text("Confirm Password") }, visualTransformation = PasswordVisualTransformation(), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password), modifier = Modifier.fillMaxWidth())
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // 🔹 Register Button
                 Button(
                     onClick = {
                         coroutineScope.launch {
-                            // 🔹 Validation Checks
+                            isLoading = true
                             if (name.isBlank() || contact.isBlank() || email.isBlank() || address.isBlank() || password.isBlank()) {
                                 snackbarMessage = "All fields are required!"
+                                isLoading = false
                                 return@launch
                             }
                             if (!contact.matches(Regex("^[0-9]{10}$"))) {
                                 snackbarMessage = "Enter a valid 10-digit contact number"
+                                isLoading = false
                                 return@launch
                             }
                             if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
                                 snackbarMessage = "Enter a valid email address"
+                                isLoading = false
                                 return@launch
                             }
                             if (password.length < 6) {
                                 snackbarMessage = "Password must be at least 6 characters"
+                                isLoading = false
                                 return@launch
                             }
                             if (password != confirmPassword) {
                                 snackbarMessage = "Passwords do not match"
+                                isLoading = false
                                 return@launch
                             }
 
-                            // 🔹 Check if Email Already Exists
                             val existingCustomer = customerDao.getCustomerByEmail(email)
                             if (existingCustomer != null) {
                                 snackbarMessage = "Email already registered!"
+                                isLoading = false
                                 return@launch
                             }
 
-                            // 🔹 Register Customer
                             val newCustomer = CustomerEntity(
                                 name = name,
                                 contact = contact,
@@ -170,12 +167,18 @@ fun RegisterScreenUI(navController: NavController?, context: Context) {
                             customerDao.registerCustomer(newCustomer)
 
                             snackbarMessage = "Registration Successful!"
+                            isLoading = false
                             navController?.navigate("login_screen")
                         }
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !isLoading
                 ) {
-                    Text("Register")
+                    if (isLoading) {
+                        CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary)
+                    } else {
+                        Text("Register")
+                    }
                 }
             }
         }

@@ -2,6 +2,8 @@ package com.example.mytailorsapp.ui.customer
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -9,48 +11,36 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.mytailorsapp.database.CustomerEntity
 import com.example.mytailorsapp.viewmodel.CustomerViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     navController: NavController,
-    customerId: Int, // Receive customer ID from navigation
+    customerId: Int,
     viewModel: CustomerViewModel = viewModel()
 ) {
     val context = LocalContext.current
+    val customer by viewModel.selectedCustomer.collectAsState()
 
-    // 🔹 Fetch customer details when screen loads
+    // Fetch customer data on screen load
     LaunchedEffect(customerId) {
         viewModel.fetchCustomerById(customerId)
     }
 
-    // 🔹 Collect customer data from StateFlow
-    val customer by viewModel.selectedCustomer.collectAsState()
-
-    // 🔹 Ensure non-null values
-    val safeCustomer = customer ?: CustomerEntity(0, "", "", "", "", "", "")
-
-    // 🔹 Remember state variables for editing
-    var name by remember { mutableStateOf(safeCustomer.name) }
-    var contact by remember { mutableStateOf(safeCustomer.contact) }
-    var email by remember { mutableStateOf(safeCustomer.email) }
-    var address by remember { mutableStateOf(safeCustomer.address) }
-    var password by remember { mutableStateOf(safeCustomer.password) }
-
-    // 🔹 Update UI state when customer data changes
-    LaunchedEffect(safeCustomer) {
-        name = safeCustomer.name
-        contact = safeCustomer.contact
-        email = safeCustomer.email
-        address = safeCustomer.address
-        password = safeCustomer.password
-    }
-
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Profile") })
+            TopAppBar(
+                title = { Text("Profile") },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                    }
+                }
+            )
         }
     ) { paddingValues ->
         Column(
@@ -60,48 +50,50 @@ fun ProfileScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text("Update Your Profile", style = MaterialTheme.typography.titleLarge)
-
-            OutlinedTextField(
-                value = name,
-                onValueChange = { name = it },
-                label = { Text("Name") }
+            Text(
+                "Profile Information",
+                style = MaterialTheme.typography.headlineSmall
             )
 
-            OutlinedTextField(
-                value = contact,
-                onValueChange = { contact = it },
-                label = { Text("Contact") }
-            )
+            customer?.let { user ->
+                ProfileDetailItem(label = "Full Name", value = user.name)
+                ProfileDetailItem(label = "Phone Number", value = user.contact)
+                ProfileDetailItem(label = "Email", value = user.email)
+                ProfileDetailItem(label = "Address", value = user.address)
+            }
 
-            OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
-                label = { Text("Email") }
-            )
-
-            OutlinedTextField(
-                value = address,
-                onValueChange = { address = it },
-                label = { Text("Address") }
-            )
-
-            OutlinedTextField(
-                value = password,
-                onValueChange = { password = it },
-                label = { Text("Password") }
-            )
-
+            // Update Profile Button
             Button(
-                onClick = {
-                    viewModel.updateCustomerProfile(name, contact, email, address, password)
-                    Toast.makeText(context, "Profile Updated!", Toast.LENGTH_SHORT).show()
-                    navController.popBackStack()
-                },
+                onClick = { navController.navigate("updateProfileScreen/$customerId") },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Save Changes")
+                Text("Update Profile")
+            }
+
+            // Logout Button
+            Button(
+                onClick = {
+                    viewModel.logout()
+                    Toast.makeText(context, "Logged Out Successfully", Toast.LENGTH_SHORT).show()
+                    navController.navigate("loginScreen") { popUpTo("profileScreen") { inclusive = true } }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+            ) {
+                Text("Logout")
             }
         }
+    }
+}
+
+@Composable
+fun ProfileDetailItem(label: String, value: String) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Text(label, style = MaterialTheme.typography.labelLarge)
+        Text(value, style = MaterialTheme.typography.bodyLarge)
+        HorizontalDivider()
     }
 }

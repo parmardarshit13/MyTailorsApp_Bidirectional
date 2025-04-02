@@ -9,7 +9,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -21,22 +20,25 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.mytailorsapp.database.AppDatabase
-import kotlinx.coroutines.launch
 import com.example.mytailorsapp.R
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreenUI(navController: NavController?, context: Context) {
-    val customerDao = remember(context) { AppDatabase.getDatabase(context).customerDao() }
-    val workerDao = remember(context) { AppDatabase.getDatabase(context).workerDao() }
+    val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // ✅ Room Database Access should be done inside a coroutine
+    val db = AppDatabase.getDatabase(context)
+    val customerDao = db.customerDao()
+    val workerDao = db.workerDao()
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var snackbarMessage by remember { mutableStateOf<String?>(null) }
-    val snackbarHostState = remember { SnackbarHostState() }
-    val coroutineScope = rememberCoroutineScope()
 
     // 🔹 Snackbar Handling
     LaunchedEffect(snackbarMessage) {
@@ -46,30 +48,24 @@ fun LoginScreenUI(navController: NavController?, context: Context) {
         }
     }
 
-    // 🔹 Background Image Fix (Added Alignment)
+    // 🔹 Background Image Fix
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.LightGray) // Replace LightGray with your theme color
+            .background(Color.LightGray)
     ) {
         Image(
             painter = painterResource(id = R.drawable.ic_auth_background_01),
             contentDescription = "Tailor Background",
-            modifier = Modifier
-                .fillMaxSize()
-                .align(Alignment.Center), // ✅ Ensure proper alignment
+            modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
         )
 
         Scaffold(
             topBar = {
-                TopAppBar(
-                    title = { Text("Login", style = TextStyle(fontSize = 24.sp)) },
-                    modifier = Modifier.padding(top = 16.dp)
-                )
+                TopAppBar(title = { Text("Login", style = TextStyle(fontSize = 24.sp)) })
             },
-            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-            modifier = Modifier.padding(top = 8.dp)
+            snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
         ) { padding ->
             Column(
                 modifier = Modifier
@@ -100,7 +96,7 @@ fun LoginScreenUI(navController: NavController?, context: Context) {
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // ✅ Login Button (Fixed Crash Issues)
+                // ✅ Login Button
                 Button(
                     onClick = {
                         coroutineScope.launch {
@@ -110,7 +106,7 @@ fun LoginScreenUI(navController: NavController?, context: Context) {
 
                             if (!isAdmin) {
                                 val customer = withContext(Dispatchers.IO) {
-                                    customerDao.authenticateUser(email, password)
+                                    customerDao.authenticate(email, password)
                                 }
                                 isCustomer = customer != null
 
@@ -130,7 +126,7 @@ fun LoginScreenUI(navController: NavController?, context: Context) {
                                 }
                                 isWorker -> {
                                     withContext(Dispatchers.IO) { workerDao.updateLoginStatus(email, true) }
-                                    navController?.navigate("worker_dashboard") // for future
+                                    navController?.navigate("worker_dashboard")
                                 }
                                 else -> snackbarMessage = "Invalid email or password"
                             }

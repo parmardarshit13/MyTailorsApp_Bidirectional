@@ -10,17 +10,18 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.mytailorsapp.viewmodel.CustomerViewModel
-import com.example.mytailorsapp.database.InventoryItem  // Assuming InventoryItem is a database entity
+import com.example.mytailorsapp.database.InventoryItem
+import com.example.mytailorsapp.database.InventoryStatus  // ✅ Import the enum
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InventoryScreen(navController: NavController, viewModel: CustomerViewModel = viewModel()) {
-    val inventoryItems by viewModel.inventoryItems.collectAsState()
+    val inventoryItems by viewModel.inventoryItems.collectAsState(initial = emptyList())
 
     Scaffold(
         topBar = { TopAppBar(title = { Text("Your Orders") }) }
     ) { paddingValues ->
-        LazyColumn(modifier = Modifier.padding(paddingValues)) {
+        LazyColumn(modifier = Modifier.padding(paddingValues).padding(16.dp)) {
             items(inventoryItems) { item ->
                 InventoryCard(item)
             }
@@ -38,9 +39,34 @@ fun InventoryCard(item: InventoryItem) {
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text("Item: ${item.name}", style = MaterialTheme.typography.titleLarge)
-            Text("Status: ${item.status}")
-            Text("Shop: ${item.shopName}")
-            Text("Expected Completion: ${item.expectedDate}")
+            Text("Type: ${item.type}", style = MaterialTheme.typography.bodyMedium)
+            Text("Price: $${item.price}", style = MaterialTheme.typography.bodyMedium)
+
+            // ✅ Use the InventoryStatus enum properly
+            Text(
+                text = "Status: ${getStatusText(item.status)}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = getStatusColor(item.status)  // Color based on status
+            )
         }
+    }
+}
+
+// ✅ Function to convert enum to a readable string
+fun getStatusText(status: InventoryStatus): String {
+    return when (status) {
+        InventoryStatus.IN_PROGRESS -> "In Progress"
+        InventoryStatus.COMPLETED -> "Completed"
+        InventoryStatus.PENDING -> "Pending"
+    }
+}
+
+// ✅ Function to assign colors based on status
+@Composable
+fun getStatusColor(status: InventoryStatus): androidx.compose.ui.graphics.Color {
+    return when (status) {
+        InventoryStatus.IN_PROGRESS -> MaterialTheme.colorScheme.primary
+        InventoryStatus.COMPLETED -> MaterialTheme.colorScheme.secondary
+        InventoryStatus.PENDING -> MaterialTheme.colorScheme.error
     }
 }

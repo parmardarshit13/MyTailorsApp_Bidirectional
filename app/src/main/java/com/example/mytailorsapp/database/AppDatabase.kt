@@ -8,13 +8,15 @@ import com.example.mytailorsapp.data.CustomerDao
 import com.example.mytailorsapp.data.WorkerDao
 import com.example.mytailorsapp.data.AdminDao
 import com.example.mytailorsapp.data.InventoryDao
+import com.example.mytailorsapp.data.MaterialDao
 
-@Database(entities = [CustomerEntity::class, AdminEntity::class, WorkerEntity::class, InventoryItem::class], version = 1, exportSchema = false)
+@Database(entities = [AdminEntity::class, CustomerEntity::class, WorkerEntity::class, InventoryItem::class, MaterialItem::class], version = 1, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun customerDao(): CustomerDao
     abstract fun adminDao(): AdminDao
     abstract fun workerDao(): WorkerDao
     abstract fun inventoryDao(): InventoryDao
+    abstract fun materialDao(): MaterialDao
 
     companion object {
         @Volatile

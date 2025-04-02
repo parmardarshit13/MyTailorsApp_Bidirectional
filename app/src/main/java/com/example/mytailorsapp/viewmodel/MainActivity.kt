@@ -13,21 +13,28 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             val navController = rememberNavController()
-            val customerDao = AppDatabase.getDatabase(this).customerDao()
-            val inventoryDao = AppDatabase.getDatabase(this).inventoryDao()
-            val workerDao = AppDatabase.getDatabase(this).workerDao()
+            val database = AppDatabase.getDatabase(this)
 
-            // ✅ Create ViewModel at activity level
+            val customerDao = database.customerDao()
+            val inventoryDao = database.inventoryDao()
+            val workerDao = database.workerDao()
+            val materialDao = database.materialDao()
+
+            // ✅ Create ViewModels at activity level
             val customerViewModel: CustomerViewModel = viewModel(
-                factory = CustomerViewModelFactory(customerDao, inventoryDao)
+                factory = CustomerViewModelFactory(customerDao, materialDao, inventoryDao)
             )
 
             val workerViewModel: WorkerViewModel = viewModel(
                 factory = WorkerViewModelFactory(workerDao)
             )
 
-            // ✅ Use different navigation files for better structure
-            AppNavigation(navController, this, customerViewModel, workerViewModel)
+            val inventoryViewModel: InventoryViewModel = viewModel(
+                factory = InventoryViewModelFactory(inventoryDao)
+            )
+
+            // ✅ Pass inventoryViewModel to AppNavigation()
+            AppNavigation(navController, this, customerViewModel, workerViewModel, inventoryViewModel)
         }
     }
 }

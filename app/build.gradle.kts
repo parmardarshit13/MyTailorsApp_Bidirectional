@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.ksp)  // ✅ Add KSP Plugin
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -66,10 +67,11 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
 
-    // ✅ Room Database Dependencies
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
-    ksp(libs.androidx.room.compiler)  // Room Compiler via KSP
+    // ✅ Firebase Dependencies (Added from libs.versions.toml)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
+    implementation(libs.firebase.storage)
 
     // ✅ Jetpack Compose Dependencies
     implementation(libs.androidx.compose.ui)
@@ -80,10 +82,11 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
 
     // ✅ Fix: Add this dependency for observeAsState support
-    implementation("androidx.compose.runtime:runtime-livedata:1.6.0")
+    implementation(libs.androidx.runtime.livedata)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-
+    implementation(libs.coil.compose)
 }
+apply(plugin = "com.google.gms.google-services")

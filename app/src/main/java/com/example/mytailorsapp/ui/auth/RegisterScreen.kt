@@ -20,26 +20,25 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.mytailorsapp.database.AppDatabase
-import com.example.mytailorsapp.database.CustomerEntity
+import com.example.mytailorsapp.data.models.CustomerEntity
 import kotlinx.coroutines.launch
 import com.example.mytailorsapp.R
-import android.content.Context
 import android.util.Patterns
+import com.example.mytailorsapp.data.repository.CustomerRepository
 
 class RegisterScreen : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            RegisterScreenUI(null, this)
+            RegisterScreenUI(null)
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegisterScreenUI(navController: NavController?, context: Context) {
-    val customerDao = remember { AppDatabase.getDatabase(context).customerDao() }
+fun RegisterScreenUI(navController: NavController?) {
+    val customerRepository = remember { CustomerRepository() }
 
     var name by remember { mutableStateOf("") }
     var contact by remember { mutableStateOf("") }
@@ -148,7 +147,7 @@ fun RegisterScreenUI(navController: NavController?, context: Context) {
                                 return@launch
                             }
 
-                            val existingCustomer = customerDao.getCustomerByEmail(email)
+                            val existingCustomer = customerRepository.getCustomerByEmail(email)
                             if (existingCustomer != null) {
                                 snackbarMessage = "Email already registered!"
                                 isLoading = false
@@ -164,7 +163,7 @@ fun RegisterScreenUI(navController: NavController?, context: Context) {
                                 userType = userType,
                                 isLoggedIn = false
                             )
-                            customerDao.registerCustomer(newCustomer)
+                            customerRepository.registerCustomer(newCustomer)
 
                             snackbarMessage = "Registration Successful!"
                             isLoading = false

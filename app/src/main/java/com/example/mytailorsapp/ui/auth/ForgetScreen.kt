@@ -1,6 +1,5 @@
 package com.example.mytailorsapp.ui.auth
 
-import android.content.Context
 import android.util.Patterns
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
@@ -11,13 +10,13 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.mytailorsapp.database.AppDatabase
+import com.example.mytailorsapp.data.repository.CustomerRepository
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ForgotPasswordScreenUI(navController: NavController?, context: Context) {
-    val customerDao = remember { AppDatabase.getDatabase(context).customerDao() }
+fun ForgotPasswordScreenUI(navController: NavController?) {
+    val customerRepository = remember { CustomerRepository() }
     var email by remember { mutableStateOf("") }
     var newPassword by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
@@ -100,9 +99,9 @@ fun ForgotPasswordScreenUI(navController: NavController?, context: Context) {
 
                         isLoading = true  // Show loading indication
 
-                        val user = customerDao.getCustomerByEmail(email)
+                        val user = customerRepository.getCustomerByEmail(email)
                         if (user != null) {
-                            customerDao.updatePassword(email, newPassword)
+                            customerRepository.updatePassword(email, newPassword)
                             snackbarMessage = "Password Reset Successful!"
                             navController?.navigate("login_screen")
                         } else {

@@ -6,55 +6,85 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.mytailorsapp.ui.customer.CategoryScreen
-import com.example.mytailorsapp.ui.customer.CustomerDashboardUI
-import com.example.mytailorsapp.ui.customer.InventoryScreen
-import com.example.mytailorsapp.ui.customer.MaterialScreen
-import com.example.mytailorsapp.ui.customer.ProfileScreen
-import com.example.mytailorsapp.ui.customer.ShopSearchScreen
-import com.example.mytailorsapp.ui.customer.UpdateProfileScreen
-import com.example.mytailorsapp.ui.customer.VirtualClothingScreen
-import com.example.mytailorsapp.viewmodel.CustomerViewModel
 import com.example.mytailorsapp.ui.auth.LoginScreenUI
+import com.example.mytailorsapp.ui.customer.*
+import com.example.mytailorsapp.viewmodel.CustomerViewModel
 
 fun NavGraphBuilder.dashboardGraph(
     navController: NavHostController,
     context: Context,
     customerViewModel: CustomerViewModel,
+    userId: Int = 0,
+    isDark: Boolean,
+    onToggleTheme: () -> Unit
+) {
+    // ✅ Main Dashboard
+    composable("customer_dashboard") {
+        CustomerDashboardUI(
+            viewModel = customerViewModel,
+            navController = navController,
+            isDark = isDark,
+            onToggleTheme = onToggleTheme
+        )
+    }
 
-    ) {
-    // Customer Routes
-    composable("customer_dashboard") { CustomerDashboardUI(customerViewModel, navController) }
-
-    // Profile Screen (Read-Only Mode)
+    // ✅ Profile (Read-Only)
     composable(
-        route = "profileScreen/{customerId}",
+        route = "profile_screen/{customerId}",
         arguments = listOf(navArgument("customerId") { type = NavType.IntType })
     ) { backStackEntry ->
         val customerId = backStackEntry.arguments?.getInt("customerId") ?: 0
-        ProfileScreen(navController, customerId)
+        ProfileScreen(navController, customerId, customerViewModel)
     }
 
-    // Update Profile Screen (Editable Mode)
+    // ✅ Update Profile
     composable(
-        route = "updateProfileScreen/{customerId}",
+        route = "update_profile_screen/{customerId}",
         arguments = listOf(navArgument("customerId") { type = NavType.IntType })
     ) { backStackEntry ->
         val customerId = backStackEntry.arguments?.getInt("customerId") ?: 0
-        UpdateProfileScreen(navController, customerId)
+        UpdateProfileScreen(navController, customerId, customerViewModel)
     }
 
-    // Login Screen (Redirect after logout)
+    // ✅ Login (Redirect after logout)
     composable("loginScreen") {
         LoginScreenUI(navController, context)
     }
 
-    composable("shop_search_screen") { ShopSearchScreen(navController) }
-    composable("category_screen") { CategoryScreen(navController) }
+    // ✅ Shop Search
+    composable("shop_search_screen") {
+        ShopSearchScreen(
+            navController = navController,
+            userId = userId,
+            isDark = isDark,
+            onToggleTheme = onToggleTheme
+        )
+    }
+
+    // ✅ Category Screen (Sidebar enabled)
+    composable("category_screen") {
+        CategoryScreen(
+            navController = navController,
+            userId = userId,
+            isDark = isDark,
+            onToggleTheme = onToggleTheme
+        )
+    }
+
+    // ✅ Material List Based on Category
     composable("material_screen/{category}") { backStackEntry ->
         val category = backStackEntry.arguments?.getString("category") ?: "All"
-        MaterialScreen(navController, category)
+        MaterialScreen(
+            navController = navController,
+            category = category,
+            viewModel = customerViewModel,
+            userId = userId,
+            isDark = isDark,
+            onToggleTheme = onToggleTheme
+        )
     }
+
+    // ✅ Virtual Try-On
     composable(
         "virtual_clothing_screen/{materialName}/{materialResId}",
         arguments = listOf(
@@ -69,5 +99,14 @@ fun NavGraphBuilder.dashboardGraph(
         )
     }
 
-    composable("inventory_screen") { InventoryScreen(navController, customerViewModel) }
+    // ✅ Inventory Tracking
+    composable("inventory_screen") {
+        InventoryScreen(
+            navController = navController,
+            viewModel = customerViewModel,
+            userId = userId,
+            isDark = isDark,
+            onToggleTheme = onToggleTheme
+        )
+    }
 }

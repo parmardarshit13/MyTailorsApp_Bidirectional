@@ -11,6 +11,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.mytailorsapp.data.models.CustomerEntity
 import com.example.mytailorsapp.viewmodel.CustomerViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -22,20 +23,32 @@ fun UpdateProfileScreen(
 ) {
     val context = LocalContext.current
     val customer by viewModel.selectedCustomer.collectAsState()
-    val safeCustomer = customer ?: return
 
-    var name by remember { mutableStateOf(safeCustomer.name) }
-    var contact by remember { mutableStateOf(safeCustomer.contact) }
-    var email by remember { mutableStateOf(safeCustomer.email) }
-    var address by remember { mutableStateOf(safeCustomer.address) }
-    var password by remember { mutableStateOf(safeCustomer.password) }
+    // 🚨 Don't return early — instead wait till data is available
+    var name by remember { mutableStateOf("") }
+    var contact by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var address by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
 
     var passwordError by remember { mutableStateOf(false) }
     var emailError by remember { mutableStateOf(false) }
 
+    // ✅ Fetch customer on entry
     LaunchedEffect(customerId) {
         viewModel.fetchCustomerById(customerId)
+    }
+
+    // ✅ Update fields only once when customer is loaded
+    LaunchedEffect(customer) {
+        customer?.let {
+            name = it.name
+            contact = it.contact
+            email = it.email
+            address = it.address
+            password = it.password
+        }
     }
 
     Scaffold(
@@ -60,69 +73,30 @@ fun UpdateProfileScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(
-                "Edit Your Profile",
-                style = MaterialTheme.typography.headlineSmall
-            )
+            Text("Edit Your Profile", style = MaterialTheme.typography.headlineSmall)
 
-            OutlinedTextField(
-                value = name,
-                onValueChange = { name = it },
-                label = { Text("Full Name") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
-            )
-
-            OutlinedTextField(
-                value = contact,
-                onValueChange = { contact = it },
-                label = { Text("Phone Number") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
-            )
-
+            OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("Full Name") }, modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(value = contact, onValueChange = { contact = it }, label = { Text("Phone Number") }, modifier = Modifier.fillMaxWidth())
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
                 label = { Text("Email Address") },
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
                 isError = emailError,
                 supportingText = {
-                    if (emailError) {
-                        Text("Enter a valid email address")
-                    }
+                    if (emailError) Text("Enter a valid email address")
                 }
             )
-
-            OutlinedTextField(
-                value = address,
-                onValueChange = { address = it },
-                label = { Text("Address") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
-            )
-
-            OutlinedTextField(
-                value = password,
-                onValueChange = { password = it },
-                label = { Text("New Password") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                isError = passwordError
-            )
-
+            OutlinedTextField(value = address, onValueChange = { address = it }, label = { Text("Address") }, modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(value = password, onValueChange = { password = it }, label = { Text("New Password") }, modifier = Modifier.fillMaxWidth(), isError = passwordError)
             OutlinedTextField(
                 value = confirmPassword,
                 onValueChange = { confirmPassword = it },
                 label = { Text("Confirm Password") },
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
                 isError = passwordError,
                 supportingText = {
-                    if (passwordError) {
-                        Text("Passwords don't match")
-                    }
+                    if (passwordError) Text("Passwords don't match")
                 }
             )
 
@@ -132,21 +106,27 @@ fun UpdateProfileScreen(
                     emailError = !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
 
                     if (!passwordError && !emailError) {
-                        viewModel.updateCustomerProfile(
-                            name = name,
-                            contact = contact,
-                            email = email,
-                            address = address,
-                            password = password
-                        )
-                        Toast.makeText(context, "Profile Updated!", Toast.LENGTH_SHORT).show()
-                        navController.popBackStack()
+                        customer?.id?.let { id ->
+                            val updatedCustomer = CustomerEntity(
+                                id = id,
+                                name = name,
+                                contact = contact,
+                                email = email,
+                                address = address,
+                                password = password,
+                                isLoggedIn = true // ✅ Maintain login status
+                            )
+                            viewModel.updateCustomerProfile(updatedCustomer)
+                            Toast.makeText(context, "Profile Updated!", Toast.LENGTH_SHORT).show()
+                            navController.popBackStack()
+                        }
                     }
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Save Changes")
             }
+
         }
     }
 }

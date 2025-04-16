@@ -3,73 +3,70 @@ package com.example.mytailorsapp.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.mytailorsapp.data.InventoryDao
-import com.example.mytailorsapp.database.InventoryItem
+import com.example.mytailorsapp.data.models.InventoryItem
+import com.example.mytailorsapp.data.repository.InventoryRepository
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-class InventoryViewModel(private val inventoryDao: InventoryDao) : ViewModel() {
+class InventoryViewModel(private val inventoryRepository: InventoryRepository) : ViewModel() {
 
-    // ✅ Live list of all inventory items
     private val _inventoryItems = MutableStateFlow<List<InventoryItem>>(emptyList())
     val inventoryItems: StateFlow<List<InventoryItem>> = _inventoryItems.asStateFlow()
 
-    init {
-        fetchInventoryItems()
-    }
-
-    // ✅ Fetch inventory directly using DAO
-    private fun fetchInventoryItems() {
+    fun fetchAdminInventory() {
         viewModelScope.launch {
-            inventoryDao.getAllInventoryItems()
-                .catch { e -> e.printStackTrace() }  // ✅ Handle errors
-                .collect { items ->
-                    _inventoryItems.value = items
-                }
+            try {
+                val items = inventoryRepository.getAllAdminInventory()
+                _inventoryItems.value = items
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 
-    // ✅ Insert new inventory item
-    fun addInventoryItem(item: InventoryItem) {
+    fun fetchCustomerInventory(customerId: Int) {
         viewModelScope.launch {
-            inventoryDao.insertInventoryItem(item)
-            fetchInventoryItems()  // Refresh list
+            try {
+                val items = inventoryRepository.getCustomerInventory(customerId)
+                _inventoryItems.value = items
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 
-    // ✅ Update existing inventory item
-    fun updateInventoryItem(updatedItem: InventoryItem) {
+    fun addInventoryItem(item: InventoryItem, isAdmin: Boolean) {
         viewModelScope.launch {
-            inventoryDao.updateInventoryItem(updatedItem)
-            fetchInventoryItems()
+            inventoryRepository.insertInventoryItem(item, isAdmin)
+            if (isAdmin) fetchAdminInventory() else fetchCustomerInventory(item.customerId ?: 0)
         }
     }
 
-    // ✅ Delete an inventory item
-    fun deleteInventoryItem(item: InventoryItem) {
+    fun updateInventoryItem(item: InventoryItem, isAdmin: Boolean) {
         viewModelScope.launch {
-            inventoryDao.deleteInventoryItem(item)
-            fetchInventoryItems()
+            inventoryRepository.updateInventoryItem(item, isAdmin)
+            if (isAdmin) fetchAdminInventory() else fetchCustomerInventory(item.customerId ?: 0)
         }
     }
 
-    // ✅ Get item by ID as Flow
-//    fun getInventoryItemById(id: Int): Flow<InventoryItem?> {
-//        return inventoryDao.getInventoryItemById(id)
-//    }
+    fun deleteInventoryItem(item: InventoryItem, isAdmin: Boolean) {
+        viewModelScope.launch {
+            inventoryRepository.deleteInventoryItem(item, isAdmin)
+            if (isAdmin) fetchAdminInventory() else fetchCustomerInventory(item.customerId ?: 0)
+        }
+    }
 
-    // ✅ Get item by name as Flow
-    fun getInventoryItemByName(name: String): Flow<InventoryItem?> {
-        return inventoryDao.getInventoryItemByName(name)
+    suspend fun getInventoryItemByName(name: String, isAdmin: Boolean): InventoryItem? {
+        return inventoryRepository.getInventoryItemByName(name, isAdmin)
     }
 }
 
 // ✅ Factory to create InventoryViewModel instances
-class InventoryViewModelFactory(private val inventoryDao: InventoryDao) : ViewModelProvider.Factory {
+class InventoryViewModelFactory(private val inventoryRepository: InventoryRepository) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(InventoryViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return InventoryViewModel(inventoryDao) as T
+            return InventoryViewModel(inventoryRepository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

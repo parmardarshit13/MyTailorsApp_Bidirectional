@@ -10,8 +10,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.mytailorsapp.database.InventoryItem
-import com.example.mytailorsapp.database.InventoryStatus
+import com.example.mytailorsapp.data.models.InventoryItem
+import com.example.mytailorsapp.data.models.InventoryStatus
 import com.example.mytailorsapp.viewmodel.InventoryViewModel
 
 @SuppressLint("SimpleDateFormat")
@@ -20,12 +20,12 @@ import com.example.mytailorsapp.viewmodel.InventoryViewModel
 fun AddInventoryScreen(
     navController: NavController,
     viewModel: InventoryViewModel,
-    customerId: Int // ✅ Added customerId parameter
 ) {
     var name by remember { mutableStateOf("") }
     var type by remember { mutableStateOf("") }
     var price by remember { mutableStateOf("") }
     var status by remember { mutableStateOf(InventoryStatus.IN_PROGRESS) } // ✅ Default status
+    var isAdmin by remember { mutableStateOf(true) }
 
     Scaffold(
         topBar = { TopAppBar(title = { Text("Add Inventory Item") }) }
@@ -96,11 +96,10 @@ fun AddInventoryScreen(
                             name = name,
                             type = type,
                             price = price.toDoubleOrNull() ?: 0.0,
-                            status = status, // ✅ Enum Used
-                            customerId = customerId // ✅ Added customerId
+                            status = status // ✅ Enum Used
                         )
 
-                        viewModel.addInventoryItem(newItem)
+                        viewModel.addInventoryItem(newItem,isAdmin)
                         navController.popBackStack() // ✅ Navigate back after adding
                     }
                 },

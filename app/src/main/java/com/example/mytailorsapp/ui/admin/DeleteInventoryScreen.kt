@@ -8,13 +8,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.example.mytailorsapp.viewmodel.InventoryViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DeleteInventoryScreen(navController: NavController, viewModel: InventoryViewModel) {
-    val inventoryList by viewModel.inventoryItems.collectAsState(emptyList())  // ✅ Uses collectAsState for reactivity
+fun DeleteInventoryScreen(viewModel: InventoryViewModel) {
+    val inventoryList by viewModel.inventoryItems.collectAsState(emptyList()) // ✅ Uses collectAsState for reactivity
+    var isAdmin by remember { mutableStateOf(true) }
 
     Scaffold(
         topBar = { TopAppBar(title = { Text("Delete Inventory Item") }) }
@@ -35,7 +35,7 @@ fun DeleteInventoryScreen(navController: NavController, viewModel: InventoryView
                             .fillMaxWidth()
                             .padding(8.dp)
                             .clickable {
-                                viewModel.deleteInventoryItem(item)
+                                viewModel.deleteInventoryItem(item,isAdmin)
                             }
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {

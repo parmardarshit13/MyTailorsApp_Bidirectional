@@ -4,15 +4,27 @@ import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.rememberNavController
+import com.example.mytailorsapp.viewmodel.AdminViewModel
 import com.example.mytailorsapp.viewmodel.CustomerViewModel
 import com.example.mytailorsapp.viewmodel.InventoryViewModel
 import com.example.mytailorsapp.viewmodel.WorkerViewModel
 
 @Composable
-fun AppNavigation(navController: NavHostController, context: Context, customerViewModel: CustomerViewModel, workerViewModel: WorkerViewModel, inventoryViewModel: InventoryViewModel) {
+fun AppNavigation(
+    navController: NavHostController = rememberNavController(),
+    context: Context,
+    customerViewModel: CustomerViewModel,
+    workerViewModel: WorkerViewModel,
+    inventoryViewModel: InventoryViewModel,
+    adminViewModel: AdminViewModel,
+    userId: Int = 0,
+    isDark: Boolean,
+    onToggleTheme: () -> Unit)
+{
     NavHost(navController = navController, startDestination = "login_screen") {
-        authGraph(navController, context) // ✅ Make sure this is included correctly
-        dashboardGraph(navController, context, customerViewModel ) // ✅ Dashboard graph included correctly
-        adminGraph(navController, workerViewModel, inventoryViewModel)
+        authGraph(navController, context)
+        dashboardGraph(navController, context, customerViewModel, userId, isDark, onToggleTheme)
+        adminGraph(navController, workerViewModel, inventoryViewModel, adminViewModel, userId, isDark, onToggleTheme)
     }
 }

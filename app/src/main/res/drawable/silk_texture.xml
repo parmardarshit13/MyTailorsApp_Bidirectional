@@ -1,5 +1,0 @@
-<!-- res/drawable/silk_texture.xml -->
-<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
-    android:src="@drawable/silk"
-    android:tileModeX="repeat"
-    android:tileModeY="repeat"/>

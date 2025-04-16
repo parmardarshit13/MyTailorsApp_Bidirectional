@@ -3,52 +3,88 @@ package com.example.mytailorsapp.ui.auth
 import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.mytailorsapp.database.AppDatabase
+import com.example.mytailorsapp.MyTailorsApp
 import com.example.mytailorsapp.R
-import kotlinx.coroutines.Dispatchers
+import com.example.mytailorsapp.data.repository.AdminRepository
+import com.example.mytailorsapp.viewmodel.CustomerViewModel
+import com.example.mytailorsapp.viewmodel.CustomerViewModelFactory
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import com.example.mytailorsapp.data.repository.CustomerRepository
+import com.example.mytailorsapp.data.repository.InventoryRepository
+import com.example.mytailorsapp.data.repository.MaterialRepository
+import com.example.mytailorsapp.viewmodel.AdminViewModel
+import com.example.mytailorsapp.viewmodel.AdminViewModelFactory
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreenUI(navController: NavController?, context: Context) {
-    val coroutineScope = rememberCoroutineScope()
+fun LoginScreenUI(navController: NavController?, context: Context = LocalContext.current) {
+    context.applicationContext as MyTailorsApp
+    val viewModel: CustomerViewModel = viewModel(
+        factory = CustomerViewModelFactory(
+            CustomerRepository(),
+            MaterialRepository(),
+            InventoryRepository()
+        )
+    )
+
+    val adminViewModel: AdminViewModel = viewModel(
+        factory = AdminViewModelFactory(AdminRepository())
+    )
+
     val snackbarHostState = remember { SnackbarHostState() }
-
-    // ✅ Room Database Access should be done inside a coroutine
-    val db = AppDatabase.getDatabase(context)
-    val customerDao = db.customerDao()
-    val workerDao = db.workerDao()
-
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var snackbarMessage by remember { mutableStateOf<String?>(null) }
+    var isLoading by remember { mutableStateOf(false) }
 
-    // 🔹 Snackbar Handling
+    // Handle snackbar messages
+    var snackbarMessage by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(snackbarMessage) {
         snackbarMessage?.let {
-            coroutineScope.launch { snackbarHostState.showSnackbar(it) }
+            snackbarHostState.showSnackbar(it)
             snackbarMessage = null
         }
     }
 
-    // 🔹 Background Image Fix
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -75,7 +111,7 @@ fun LoginScreenUI(navController: NavController?, context: Context) {
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.Center
             ) {
-                // ✅ Email Field
+                // Email Field
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it.trim() },
@@ -85,7 +121,7 @@ fun LoginScreenUI(navController: NavController?, context: Context) {
                 )
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // ✅ Password Field
+                // Password Field
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
@@ -96,50 +132,55 @@ fun LoginScreenUI(navController: NavController?, context: Context) {
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // ✅ Login Button
+                // Login Button
                 Button(
                     onClick = {
-                        coroutineScope.launch {
-                            val isAdmin = email == "admin@gmail.com" && password == "admin123"
-                            var isCustomer = false
-                            var isWorker = false
+                        if (email.isEmpty() || password.isEmpty()) {
+                            snackbarMessage = "Please fill all fields"
+                            return@Button
+                        }
 
-                            if (!isAdmin) {
-                                val customer = withContext(Dispatchers.IO) {
-                                    customerDao.authenticate(email, password)
+                        // ✅ Try Admin login via repository
+                        adminViewModel.authenticateAdmin(email, password) { isAdmin ->
+                            if (isAdmin) {
+                                navController?.navigate("admin_dashboard") {
+                                    popUpTo("login_screen") { inclusive = true }
                                 }
-                                isCustomer = customer != null
-
-                                if (!isCustomer) {
-                                    val worker = withContext(Dispatchers.IO) {
-                                        workerDao.authenticateWorker(email, password)
+                            } else {
+                                // continue with customer login
+                                isLoading = true
+                                viewModel.viewModelScope.launch {
+                                    try {
+                                        val success = viewModel.login(email, password)
+                                        if (success) {
+                                            navController?.navigate("customer_dashboard") {
+                                                popUpTo("login_screen") { inclusive = true }
+                                            }
+                                        } else {
+                                            snackbarMessage = "Invalid email or password"
+                                        }
+                                    } catch (e: Exception) {
+                                        snackbarMessage = "Login failed: ${e.message}"
+                                    } finally {
+                                        isLoading = false
                                     }
-                                    isWorker = worker != null && worker.userType == "worker"
                                 }
-                            }
-
-                            when {
-                                isAdmin -> navController?.navigate("admin_dashboard")
-                                isCustomer -> {
-                                    withContext(Dispatchers.IO) { customerDao.updateLoginStatus(email, true) }
-                                    navController?.navigate("customer_dashboard")
-                                }
-                                isWorker -> {
-                                    withContext(Dispatchers.IO) { workerDao.updateLoginStatus(email, true) }
-                                    navController?.navigate("worker_dashboard")
-                                }
-                                else -> snackbarMessage = "Invalid email or password"
                             }
                         }
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !isLoading
                 ) {
-                    Text("Login")
+                    if (isLoading) {
+                        CircularProgressIndicator()
+                    } else {
+                        Text("Login")
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // ✅ Register & Forgot Password Links
+                // Register & Forgot Password Links
                 TextButton(onClick = { navController?.navigate("register_screen") }) {
                     Text("Don't have an account? Register")
                 }

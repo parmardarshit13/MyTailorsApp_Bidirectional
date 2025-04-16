@@ -10,20 +10,49 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.mytailorsapp.viewmodel.CustomerViewModel
-import com.example.mytailorsapp.database.InventoryItem
-import com.example.mytailorsapp.database.InventoryStatus  // ✅ Import the enum
+import com.example.mytailorsapp.data.models.InventoryItem
+import com.example.mytailorsapp.data.models.InventoryStatus  // ✅ Import the enum
+import com.example.mytailorsapp.ui.common.SidebarDrawer
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InventoryScreen(navController: NavController, viewModel: CustomerViewModel = viewModel()) {
+fun InventoryScreen(
+    navController: NavController,
+    viewModel: CustomerViewModel = viewModel(),
+    userId: Int = 0,
+    isDark: Boolean,
+    onToggleTheme: () -> Unit
+) {
     val inventoryItems by viewModel.inventoryItems.collectAsState(initial = emptyList())
 
-    Scaffold(
-        topBar = { TopAppBar(title = { Text("Your Orders") }) }
-    ) { paddingValues ->
-        LazyColumn(modifier = Modifier.padding(paddingValues).padding(16.dp)) {
-            items(inventoryItems) { item ->
-                InventoryCard(item)
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+    var selectedItem by remember { mutableIntStateOf(0) }
+
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            // ✅ Use centralized sidebar here
+            SidebarDrawer(
+                drawerState = drawerState,
+                navController = navController,
+                selectedIndex = selectedItem,
+                onSelect = { selectedItem = it },
+                scope = scope,
+                isDark = isDark,
+                onToggleTheme = onToggleTheme,
+                userId = userId,
+                isAdminDashboard = false // ✅ default for customers
+            )
+        }
+    ){
+        Scaffold(
+            topBar = { TopAppBar(title = { Text("Your Orders") }) }
+        ) { paddingValues ->
+            LazyColumn(modifier = Modifier.padding(paddingValues).padding(16.dp)) {
+                items(inventoryItems) { item ->
+                    InventoryCard(item)
+                }
             }
         }
     }

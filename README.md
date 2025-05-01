@@ -61,8 +61,6 @@ Edit
     ├── activity_login.xml
     ├── activity_cart.xml
     └── ...
-🖼️ Screenshots & Diagrams
-(Add screenshots of your app screens and UML diagrams here for better presentation)
 
 🔐 Firebase Collections Used
 admin_inventory_item

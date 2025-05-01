@@ -1,9 +1,11 @@
 package com.example.mytailorsapp.data.models
 
+import com.google.firebase.firestore.DocumentId
+
 data class AdminEntity(
-    val id: Int = 0,
+    @DocumentId
+    val id: String = "",
     val username: String = "",
     val password: String = "",
-    val isLoggedIn: Boolean = false,
-    val isAdmin: Boolean = true
+    val isLoggedIn: Boolean = false
 )

@@ -1,7 +1,8 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.MyTailorsApp" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+    <style name="Theme.MyTailorsApp" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Dark mode colors -->
+        <item name="colorPrimary">#80CBC4</item>
+        <item name="colorSecondary">#4DB6AC</item>
+        <item name="android:windowBackground">#121212</item>
     </style>
 </resources>

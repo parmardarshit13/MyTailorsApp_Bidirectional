@@ -6,43 +6,78 @@ import kotlinx.coroutines.tasks.await
 
 class InventoryRepository {
     private val firestore = FirebaseFirestore.getInstance()
-    private val adminCollection = firestore.collection("admin_inventory_item")
-    private val customerCollection = firestore.collection("customer_inventory_item")
+    private val adminInventoryRef = firestore.collection("admin_inventory_item")
 
+    // ✅ Fetch all items
     suspend fun getAllAdminInventory(): List<InventoryItem> {
-        val snapshot = adminCollection.get().await()
-        return snapshot.toObjects(InventoryItem::class.java)
+        return try {
+            val snapshot = adminInventoryRef.get().await()
+            snapshot.toObjects(InventoryItem::class.java)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
+        }
     }
 
-    suspend fun getCustomerInventory(customerId: Int): List<InventoryItem> {
-        val snapshot = customerCollection
-            .whereEqualTo("customerId", customerId)
-            .get().await()
-        return snapshot.toObjects(InventoryItem::class.java)
+    // ✅ Insert a new item
+    suspend fun insertInventoryItem(item: InventoryItem) {
+        try {
+            val docRef = adminInventoryRef.add(item).await()
+            docRef.update("documentId", docRef.id).await() // store the ID inside document
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
-    suspend fun insertInventoryItem(item: InventoryItem, isAdmin: Boolean) {
-        val collection = if (isAdmin) adminCollection else customerCollection
-        collection.add(item).await()
+    // ✅ Update item by matching ID
+    suspend fun updateInventoryItem(item: InventoryItem) {
+        try {
+            item.id?.let {
+                adminInventoryRef.document(it).set(item).await()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
-    suspend fun updateInventoryItem(item: InventoryItem, isAdmin: Boolean) {
-        val collection = if (isAdmin) adminCollection else customerCollection
-        val query = collection.whereEqualTo("id", item.id).get().await()
-        val document = query.documents.firstOrNull()
-        document?.reference?.set(item)?.await()
+    // ✅ Delete item by ID
+    suspend fun deleteInventoryItem(item: InventoryItem): Boolean {
+        return try {
+            item.id?.let {
+                adminInventoryRef.document(it).delete().await()
+                true
+            } ?: false
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
     }
 
-    suspend fun deleteInventoryItem(item: InventoryItem, isAdmin: Boolean) {
-        val collection = if (isAdmin) adminCollection else customerCollection
-        val query = collection.whereEqualTo("id", item.id).get().await()
-        val document = query.documents.firstOrNull()
-        document?.reference?.delete()?.await()
+    // ✅ Fetch by Customer Name (for searching)
+    suspend fun getInventoryItemByCustomerName(name: String): List<InventoryItem> {
+        return try {
+            val snapshot = adminInventoryRef
+                .whereEqualTo("customerName", name)
+                .get()
+                .await()
+            snapshot.toObjects(InventoryItem::class.java)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
+        }
     }
 
-    suspend fun getInventoryItemByName(name: String, isAdmin: Boolean): InventoryItem? {
-        val collection = if (isAdmin) adminCollection else customerCollection
-        val snapshot = collection.whereEqualTo("name", name).get().await()
-        return snapshot.documents.firstOrNull()?.toObject(InventoryItem::class.java)
+    // ✅ Fetch by Worker Name (for filter)
+    suspend fun getInventoryByWorker(workerName: String): List<InventoryItem> {
+        return try {
+            val snapshot = adminInventoryRef
+                .whereEqualTo("workerName", workerName)
+                .get()
+                .await()
+            snapshot.toObjects(InventoryItem::class.java)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
+        }
     }
 }

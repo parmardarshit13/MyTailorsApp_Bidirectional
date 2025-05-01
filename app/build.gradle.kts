@@ -1,8 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.kotlin.ksp)  // ✅ Add KSP Plugin
     id("com.google.gms.google-services")
 }
 
@@ -21,11 +19,7 @@ android {
     }
 
     buildFeatures {
-        compose = true
-    }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.10"
+        viewBinding = true
     }
 
     buildTypes {
@@ -54,16 +48,11 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
-    implementation(libs.androidx.runtime.android)
-    implementation(libs.androidx.navigation.compose)
-    implementation(libs.androidx.navigation.fragment)
-    implementation(libs.androidx.navigation.ui)
-    implementation(libs.androidx.material3.android)
-    implementation(libs.androidx.foundation.android)
-    implementation(libs.androidx.ui.tooling.preview.android)
     implementation(libs.androidx.lifecycle.runtime)
     implementation(libs.androidx.lifecycle.viewmodel)
     implementation(libs.androidx.lifecycle.livedata)
+
+    // Coroutine Libraries
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
 
@@ -73,20 +62,17 @@ dependencies {
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.storage)
 
-    // ✅ Jetpack Compose Dependencies
-    implementation(libs.androidx.compose.ui)
-    implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.lifecycle.runtime.compose)
-
-    implementation(libs.androidx.compose.ui)
-    implementation(libs.androidx.compose.ui.graphics)
-
-    // ✅ Fix: Add this dependency for observeAsState support
-    implementation(libs.androidx.runtime.livedata)
-
+    // Testing Libraries
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    implementation(libs.coil.compose)
+
+    // Coil for image loading
+    implementation(libs.coil)
+
+    //Google Place API for Shop Search
+    implementation (libs.play.services.maps)
+    implementation (libs.play.services.location)
+    implementation(libs.places)
 }
 apply(plugin = "com.google.gms.google-services")

@@ -8,13 +8,19 @@ class AdminRepository {
     private val firestore = FirebaseFirestore.getInstance()
     private val adminsCollection = firestore.collection("admins")
 
-    suspend fun getAdmin(username: String, password: String): AdminEntity? {
+    suspend fun loginAdmin(username: String, password: String): AdminEntity? {
         val snapshot = adminsCollection
             .whereEqualTo("username", username)
             .whereEqualTo("password", password)
             .get().await()
 
-        return snapshot.documents.firstOrNull()?.toObject(AdminEntity::class.java)
+        val document = snapshot.documents.firstOrNull()
+        return if (document != null) {
+            adminsCollection.document(document.id).update("isLoggedIn", true).await()
+            document.toObject(AdminEntity::class.java)
+        } else {
+            null
+        }
     }
 
     suspend fun updateLoginStatus(isLoggedIn: Boolean) {

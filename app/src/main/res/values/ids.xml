@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="nav_admin_dashboard" type="id"/>
+    <item name="nav_manage_workers" type="id"/>
+    <item name="nav_manage_shops" type="id"/>
+    <item name="nav_manage_inventory" type="id"/>
+    <item name="nav_profile" type="id"/>
+    <item name="nav_search" type="id"/>
+
+    <item name="nav_customer_dashboard" type="id"/>
+    <item name="nav_customer_profile" type="id"/>
+    <item name="nav_customer_categories" type="id"/>
+    <item name="nav_customer_materials" type="id"/>
+    <item name="nav_customer_orders" type="id"/>
+    <item name="nav_customer_shops" type="id"/>
+    <item name="nav_customer_cart" type="id"/>
+    <item name="nav_customer_wishlist" type="id"/>
+    <item name="nav_customer_virtual" type="id"/>
+
+    <item name="nav_admin_manage_workers" type="id"/>
+    <item name="nav_admin_manage_shops" type="id"/>
+    <item name="nav_admin_manage_inventory" type="id"/>
+
+    <item name="tvInventoryName" type="id"/>"
+    <item name="tvInventoryType" type="id"/>"
+    <item name="tvInventoryPrice" type="id"/>"
+    <item name="tvInventoryStatus" type="id"/>"
+    <item name="btnEdit" type="id"/>"
+    <item name="btnDelete" type="id"/>"
+    <item name="btnAdd" type="id"/>"
+</resources>

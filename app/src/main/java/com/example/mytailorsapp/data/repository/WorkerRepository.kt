@@ -6,7 +6,7 @@ import kotlinx.coroutines.tasks.await
 
 class WorkerRepository {
     private val firestore = FirebaseFirestore.getInstance()
-    private val workersCollection = firestore.collection("workers")
+    private val workersCollection = firestore.collection("worker")
 
     suspend fun authenticateWorker(email: String, password: String): WorkerEntity? {
         val snapshot = workersCollection
@@ -17,8 +17,8 @@ class WorkerRepository {
         return snapshot.documents.firstOrNull()?.toObject(WorkerEntity::class.java)
     }
 
-    suspend fun getWorkerById(id: Int): WorkerEntity? {
-        val snapshot = workersCollection.whereEqualTo("id", id).get().await()
+    suspend fun getWorkerByName(name: String): WorkerEntity? {
+        val snapshot = workersCollection.whereEqualTo("name", name).get().await()
         return snapshot.toObjects(WorkerEntity::class.java).firstOrNull()
     }
 
@@ -36,7 +36,7 @@ class WorkerRepository {
         workersCollection.add(worker).await()
     }
 
-    suspend fun deleteWorker(workerId: Int) {
+    suspend fun deleteWorker(workerId: String) {
         val snapshot = workersCollection.whereEqualTo("id", workerId).get().await()
         snapshot.documents.firstOrNull()?.reference?.delete()?.await()
     }

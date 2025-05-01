@@ -1,8 +1,7 @@
 package com.example.mytailorsapp.viewmodel
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -14,22 +13,14 @@ class AdminViewModel(
     private val repository: AdminRepository
 ) : ViewModel() {
 
-    var adminDetails by mutableStateOf<AdminEntity?>(null)
-        private set
-
-    fun insertAdmin(admin: AdminEntity) {
-        viewModelScope.launch {
-            // Firebase auto-generates IDs; typically you'd use `add()` if needed
-            // This is a placeholder in case you implement add functionality in repository
-        }
-    }
+    private val _adminDetails = MutableLiveData<AdminEntity?>()
+    val adminDetails: LiveData<AdminEntity?> get() = _adminDetails
 
     fun authenticateAdmin(username: String, password: String, onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
-            val admin = repository.getAdmin(username, password)
+            val admin = repository.loginAdmin(username, password)
             if (admin != null) {
-                repository.updateLoginStatus(true)
-                adminDetails = admin
+                _adminDetails.value = admin
                 onResult(true)
             } else {
                 onResult(false)
@@ -40,13 +31,13 @@ class AdminViewModel(
     fun logout() {
         viewModelScope.launch {
             repository.updateLoginStatus(false)
-            adminDetails = null
+            _adminDetails.value = null
         }
     }
 
     fun fetchLoggedInAdmin() {
         viewModelScope.launch {
-            adminDetails = repository.getLoggedInAdmin()
+            _adminDetails.value = repository.getLoggedInAdmin()
         }
     }
 }

@@ -2,8 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- ✅ Required for Firebase -->
+    <!-- ✅ Permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <application
         android:name=".MyTailorsApp"
@@ -16,15 +18,49 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MyTailorsApp"
         tools:targetApi="31">
+
+        <!-- ✅ Google Maps API Key -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_maps_key" />
+
+        <!-- ✅ Auth Activities -->
+        <activity android:name=".ui.auth.LoginActivity" />
+        <activity android:name=".ui.auth.RegisterActivity" />
+        <activity android:name=".ui.auth.ForgotPasswordActivity" />
+
+        <!-- ✅ Admin Activities -->
+        <activity android:name=".ui.admin.AdminDashboardActivity" />
+        <activity android:name=".ui.admin.AdminManageInventoryActivity" />
+        <activity android:name=".ui.admin.AddInventoryActivity" />
+        <activity android:name=".ui.admin.UpdateInventoryActivity" />
+        <activity android:name=".ui.admin.DeleteInventoryActivity" />
+        <activity android:name=".ui.admin.AdminProfileActivity" />
+        <activity android:name=".ui.admin.AdminManageShopsActivity" />
+        <activity android:name=".ui.admin.AdminManageWorkersActivity" />
+        <activity android:name=".ui.admin.WorkerSearchActivity" />
+        <activity android:name=".ui.admin.SearchInventoryActivity" />
+
+        <!-- ✅ Customer Activities -->
+        <activity android:name=".ui.customer.CustomerDashboardActivity" />
+        <activity android:name=".ui.customer.CategoryActivity" />
+        <activity android:name=".ui.customer.MaterialActivity" />
+        <activity android:name=".ui.customer.MyWishlistActivity" />
+        <activity android:name=".ui.customer.CustomerProfileActivity" />
+        <activity android:name=".ui.customer.UpdateCustomerProfileActivity" />
+        <activity android:name=".ui.customer.ShopSearchActivity" />
+        <activity android:name=".ui.customer.VirtualClothingActivity" />
+        <activity android:name=".ui.customer.MaterialDetailActivity" />
+        <activity android:name=".ui.customer.CustomerCartActivity" />
+
+        <!-- ✅ Main Launcher -->
         <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
     </application>
-
 </manifest>

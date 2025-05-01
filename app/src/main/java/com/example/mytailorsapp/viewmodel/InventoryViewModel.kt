@@ -1,68 +1,78 @@
 package com.example.mytailorsapp.viewmodel
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.example.mytailorsapp.data.models.InventoryItem
 import com.example.mytailorsapp.data.repository.InventoryRepository
-import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class InventoryViewModel(private val inventoryRepository: InventoryRepository) : ViewModel() {
 
-    private val _inventoryItems = MutableStateFlow<List<InventoryItem>>(emptyList())
-    val inventoryItems: StateFlow<List<InventoryItem>> = _inventoryItems.asStateFlow()
+    private val _inventoryItems = MutableLiveData<List<InventoryItem>>()
+    val inventoryItems: LiveData<List<InventoryItem>> = _inventoryItems
 
+    // ✅ Fetch all admin-side inventory
     fun fetchAdminInventory() {
         viewModelScope.launch {
             try {
                 val items = inventoryRepository.getAllAdminInventory()
-                _inventoryItems.value = items
+                _inventoryItems.postValue(items)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
     }
 
-    fun fetchCustomerInventory(customerId: Int) {
+    // ✅ Add item
+    fun addInventoryItem(item: InventoryItem) {
+        viewModelScope.launch {
+            inventoryRepository.insertInventoryItem(item)
+            fetchAdminInventory()
+        }
+    }
+
+    // ✅ Update item
+    fun updateInventoryItem(item: InventoryItem) {
+        viewModelScope.launch {
+            inventoryRepository.updateInventoryItem(item)
+            fetchAdminInventory()
+        }
+    }
+
+    // ✅ Delete item
+    fun deleteInventoryItem(item: InventoryItem) {
+        viewModelScope.launch {
+            inventoryRepository.deleteInventoryItem(item)
+            fetchAdminInventory()
+        }
+    }
+
+    // ✅ Search by customer name
+    fun searchByCustomerName(name: String) {
         viewModelScope.launch {
             try {
-                val items = inventoryRepository.getCustomerInventory(customerId)
-                _inventoryItems.value = items
+                val results = inventoryRepository.getInventoryItemByCustomerName(name)
+                _inventoryItems.postValue(results)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
     }
 
-    fun addInventoryItem(item: InventoryItem, isAdmin: Boolean) {
+    // ✅ Filter by worker name
+    fun filterByWorkerName(worker: String) {
         viewModelScope.launch {
-            inventoryRepository.insertInventoryItem(item, isAdmin)
-            if (isAdmin) fetchAdminInventory() else fetchCustomerInventory(item.customerId ?: 0)
+            try {
+                val results = inventoryRepository.getInventoryByWorker(worker)
+                _inventoryItems.postValue(results)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
-    }
-
-    fun updateInventoryItem(item: InventoryItem, isAdmin: Boolean) {
-        viewModelScope.launch {
-            inventoryRepository.updateInventoryItem(item, isAdmin)
-            if (isAdmin) fetchAdminInventory() else fetchCustomerInventory(item.customerId ?: 0)
-        }
-    }
-
-    fun deleteInventoryItem(item: InventoryItem, isAdmin: Boolean) {
-        viewModelScope.launch {
-            inventoryRepository.deleteInventoryItem(item, isAdmin)
-            if (isAdmin) fetchAdminInventory() else fetchCustomerInventory(item.customerId ?: 0)
-        }
-    }
-
-    suspend fun getInventoryItemByName(name: String, isAdmin: Boolean): InventoryItem? {
-        return inventoryRepository.getInventoryItemByName(name, isAdmin)
     }
 }
-
-// ✅ Factory to create InventoryViewModel instances
-class InventoryViewModelFactory(private val inventoryRepository: InventoryRepository) : ViewModelProvider.Factory {
+class InventoryViewModelFactory(
+    private val inventoryRepository: InventoryRepository
+) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(InventoryViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")

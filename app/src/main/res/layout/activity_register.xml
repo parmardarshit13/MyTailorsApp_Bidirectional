@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/register_root"
+    android:background="@drawable/bg_futuristic_gradient"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:text="Register"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:layout_gravity="center"
+            android:layout_marginBottom="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <EditText
+            android:id="@+id/etName"
+            android:layout_width="match_parent"
+            android:textColor="@color/black"
+            android:layout_height="45dp"
+            android:background="@drawable/bg_edittext"
+            android:hint="  Full Name"
+            android:textAlignment="textStart"
+            android:textColorHint="@color/black"/>
+
+        <EditText
+            android:id="@+id/etContact"
+            android:hint="  Contact Number"
+            android:layout_marginTop="10dp"
+            android:textColor="@color/black"
+            android:background="@drawable/bg_edittext"
+            android:inputType="phone"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:textColorHint="@color/black"
+            android:textAlignment="textStart" />
+
+        <EditText
+            android:id="@+id/etEmail"
+            android:hint="  Email"
+            android:layout_marginTop="10dp"
+            android:textColor="@color/black"
+            android:background="@drawable/bg_edittext"
+            android:inputType="textEmailAddress"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:textColorHint="@color/black"
+            android:textAlignment="textStart" />
+
+        <EditText
+            android:id="@+id/etAddress"
+            android:hint="  Address"
+            android:layout_marginTop="10dp"
+            android:textColor="@color/black"
+            android:background="@drawable/bg_edittext"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:textColorHint="@color/black"
+            android:textAlignment="textStart" />
+
+        <Spinner
+            android:id="@+id/spinnerUserType"
+            android:background="@drawable/bg_edittext"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:entries="@array/user_types"
+            android:layout_marginTop="10dp"
+            android:textColor="@color/black"
+            android:textColorHint="@color/black"
+            android:textAlignment="textStart"/>
+
+        <EditText
+            android:id="@+id/etPassword"
+            android:hint="  Password"
+            android:layout_marginTop="10dp"
+            android:textColor="@color/black"
+            android:background="@drawable/bg_edittext"
+            android:inputType="textPassword"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:textColorHint="@color/black"
+            android:textAlignment="textStart" />
+
+        <EditText
+            android:id="@+id/etConfirmPassword"
+            android:hint="   Confirm Password"
+            android:layout_marginTop="10dp"
+            android:textColor="@color/black"
+            android:background="@drawable/bg_edittext"
+            android:inputType="textPassword"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:textColorHint="@color/black"
+            android:textAlignment="textStart" />
+
+        <Button
+            android:id="@+id/btnRegister"
+            android:text="Register"
+            android:textColor="@color/black"
+            android:layout_marginTop="20dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/tvSnackbar"
+            android:textColor="#FF0000"
+            android:paddingTop="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+</ScrollView>

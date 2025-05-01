@@ -17,7 +17,7 @@ class MaterialRepository {
         snapshot.documents.firstOrNull()?.reference?.set(item)?.await()
     }
 
-    suspend fun deleteMaterial(id: Int) {
+    suspend fun deleteMaterial(id: String) {
         val snapshot = materialCollection.whereEqualTo("id", id).get().await()
         snapshot.documents.firstOrNull()?.reference?.delete()?.await()
     }
@@ -27,8 +27,11 @@ class MaterialRepository {
         return snapshot.toObjects(MaterialItem::class.java)
     }
 
-    suspend fun getMaterialById(id: Int): MaterialItem? {
-        val snapshot = materialCollection.whereEqualTo("id", id).get().await()
-        return snapshot.toObjects(MaterialItem::class.java).firstOrNull()
+    suspend fun getMaterialsByCategory(category: String): List<MaterialItem> {
+        val snapshot = materialCollection
+            .whereEqualTo("category", category)
+            .get()
+            .await()
+        return snapshot.toObjects(MaterialItem::class.java)
     }
 }

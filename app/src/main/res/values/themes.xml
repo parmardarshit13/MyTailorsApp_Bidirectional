@@ -1,9 +1,9 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.MyTailorsApp" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+    <style name="Theme.MyTailorsApp" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Primary brand color -->
+        <item name="colorPrimary">#00695C</item>
+        <item name="colorSecondary">#009688</item>
+        <item name="android:windowBackground">#F1F1F1</item>
+        <!-- Customize more if needed -->
     </style>
-
-    <style name="Theme.MyTailorsApp" parent="Base.Theme.MyTailorsApp" />
 </resources>
